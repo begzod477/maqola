@@ -54,16 +54,18 @@ class AuthorApi(APIView):
         return Response({'error': 'Author id is required for this operation'}, status=400)
     
 class ArticleApi(APIView):
-    def get(self, request: Request, pk=None):
+    def get(self, request, pk=None):
         if pk:
             try:
                 article = Article.objects.get(pk=pk)
                 serializer = ArticleSerializer(article)
                 return Response(serializer.data)
-            except:
+            except Article.DoesNotExist:
                 return Response({'error': 'Article not found'}, status=404)
+        
         articles = Article.objects.all()
-        return Response(ArticleSerializer(articles,).data)
+        serializer = ArticleSerializer(articles, many=True)  
+        return Response(serializer.data)
     
     def post(self, request: Request, pk=None):
         if pk:
@@ -100,16 +102,18 @@ class ArticleApi(APIView):
 
 
 class CommentApi(APIView):
-    def get(self, request: Request, pk=None):
+    def get(self, request, pk=None):
         if pk:
             try:
                 comment = Comment.objects.get(pk=pk)
                 serializer = CommentSerializer(comment)
                 return Response(serializer.data)
-            except:
+            except Comment.DoesNotExist:
                 return Response({'error': 'Comment not found'}, status=404)
+        
         comments = Comment.objects.all()
-        return Response(CommentSerializer(comments,).data)
+        serializer = CommentSerializer(comments, many=True)  
+        return Response(serializer.data)
     
     def post(self, request: Request, pk=None):
         if pk:
@@ -145,17 +149,19 @@ class CommentApi(APIView):
     
 
 class CategoryApi(APIView):
-    def get(self, request: Request, pk=None):
+    def get(self, request, pk=None):
         if pk:
             try:
                 category = Category.objects.get(pk=pk)
                 serializer = CategorySerializer(category)
                 return Response(serializer.data)
-            except:
+            except Category.DoesNotExist:
                 return Response({'error': 'Category not found'}, status=404)
+        
         categories = Category.objects.all()
-        return Response(CategorySerializer(categories,).data)
-    
+        serializer = CategorySerializer(categories, many=True)  
+        return Response(serializer.data)
+
     def post(self, request: Request, pk=None):
         if pk:
             return Response({'error': 'Not allowed to create category with an existing id'}, status=404)
