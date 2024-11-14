@@ -7,7 +7,6 @@ from .serializers import AuthorSerializer,ArticleSerializer, CommentSerializer, 
 
 
 # Create your views here.
-
 class AuthorApi(APIView):
     def get(self, request: Request, pk=None):
         if pk:
@@ -15,18 +14,20 @@ class AuthorApi(APIView):
                 author = Author.objects.get(pk=pk)
                 serializer = AuthorSerializer(author)
                 return Response(serializer.data)
-            except:
+            except Author.DoesNotExist:
                 return Response({'error': 'Author not found'}, status=404)
+        
         authors = Author.objects.all()
-        return Response(AuthorSerializer(authors,).data)
+        serializer = AuthorSerializer(authors, many=True)  
+        return Response(serializer.data)
     
     def post(self, request: Request, pk=None):
         if pk:
-            return Response({'error': 'Not allowed to create author with an existing id'}, status=404)
+            return Response({'error': 'Not allowed to create author with an existing id'}, status=400)
         serializer = AuthorSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         author = serializer.save()
-        return Response(AuthorSerializer(author).data)
+        return Response(AuthorSerializer(author).data, status=201)
     
     def put(self, request: Request, pk):
         if pk:
@@ -36,11 +37,10 @@ class AuthorApi(APIView):
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
                 return Response(AuthorSerializer(author).data)
-            except:
+            except Author.DoesNotExist:
                 return Response({'error': 'Author not found'}, status=404)
         
-        return Response({'error': 'Author id is required for this operation'}, status=404)
-
+        return Response({'error': 'Author id is required for this operation'}, status=400)
 
     def delete(self, request: Request, pk=None):
         if pk:
@@ -48,12 +48,11 @@ class AuthorApi(APIView):
                 author = Author.objects.get(pk=pk)
                 author.delete()
                 return Response({'message': 'Author deleted successfully'})
-            except:
+            except Author.DoesNotExist:
                 return Response({'error': 'Author not found'}, status=404)
         
-        return Response({'error': 'Author id is required for this operation'}, status=404)
-        
-
+        return Response({'error': 'Author id is required for this operation'}, status=400)
+    
 class ArticleApi(APIView):
     def get(self, request: Request, pk=None):
         if pk:
